@@ -1,7 +1,4 @@
 # Simple RESTful API with Express.js
-![](https://img.shields.io/badge/Code%20Style-Standard-yellow.svg)
-![](https://img.shields.io/badge/Dependencies-Express-green.svg)
-![](https://img.shields.io/badge/License-Beerware-yellowgreen.svg)
 
 <p align="center">
   <a href="https://nodejs.org/">
