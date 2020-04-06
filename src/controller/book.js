@@ -48,7 +48,7 @@ module.exports = {
   },
 
   updateBook: (req, res) => {
-    const idBook = req.params.id_book
+    const idBook = req.params.id
     const { title, description, image, status, author, id_category } = req.body;
     const data = {
       title,
@@ -70,7 +70,7 @@ module.exports = {
     const idBook = req.params.id_book
     bookModel.deleteBook(idBook)
       .then((result) => {
-        
+        res.send(result);
       })
       .catch(err => console.log(err));
   },

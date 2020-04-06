@@ -16,11 +16,10 @@ const multer = require('multer');
 // const upload = multer({ storage: storage })
 
 Router
-
   .get('/', CategoryController.getCategory)
   .post('/insert', CategoryController.insertCategory)
   .patch('/:id_Category', CategoryController.updateCategory)
-  .delete('/:id_Category', CategoryController.deleteCategory)
+  .delete('/:id', CategoryController.deleteCategory)
   // .get('/:id_Category', CategoryController.CategoryDetail)
   // .post('/insert', (req, res) => res.send('ini buku ke 1'))
 

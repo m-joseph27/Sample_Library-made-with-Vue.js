@@ -59,7 +59,7 @@ module.exports = {
       })
     })
   },
-  deleteCategory: (id_Category) => {
+  deleteCategory: (id) => {
     return new Promise((resolve, reject) => {
       connection.query("DELETE FROM book WHERE name = ?", id_Category, (err, result) => {
         if (!err) {

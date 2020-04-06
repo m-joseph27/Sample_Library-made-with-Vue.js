@@ -1,7 +1,8 @@
 const userModels = require('../models/user');
 const MiscHelper = require('../helpers/helpers');
-const jwt = require('jsonwebtoken')
-const cloudinary = require('cloudinary')
+const { genSaltSync, compareSync, hashSync} = require('bcrypt');
+// const jwt = require('jsonwebtoken')
+// const cloudinary = require('cloudinary')
 module.exports = {
     getUser: (req, res) => {
         const search = req.query.search
@@ -28,107 +29,57 @@ module.exports = {
             })
     },
     register: (req, res) => {
-
-        const salt = MiscHelper.generateSalt(18)
-        const passwordHash = MiscHelper.setPassword(req.body.password, salt)
+        const {email, fullname, password} = req.body
         const data = {
-            card_number: req.body.card_number,
-            email: req.body.email,
-            fullname: req.body.fullname,
-            password: passwordHash.passwordHash,
-            salt: passwordHash.salt,
-            token: '',
-            phone: req.body.phone,
-            job: req.body.job,
-            address: req.body.address,
-            status: 1,
-            role_id: 3,
-            photo: '',
-            created_at: new Date(),
-            updated_at: new Date()
+            email,
+            fullname,
+            password,
+            photo: 'https://i.pinimg.com/originals/3f/cd/de/3fcdde7d88b8f8dd8b5edf5cfc742325.jpg',
+            status: 1
         }
-        console.log(data)
+        const salt = genSaltSync(10)
+        data.password = hashSync(data.password, salt)
         userModels.register(data)
-            .then((resultRegister) => {
-                MiscHelper.response(res, resultRegister, 200)
+            .then((result) => {
+                MiscHelper.response(res, result, 200)
             })
-            .catch((error) => {
-                console.log(error)
+            .catch(err => {
+                MiscHelper.response(res, {}, 201, err)
             })
     },
     login: (req, res) => {
-        const email = req.body.email
-        const password = req.body.password
-        console.log(req.headers['x-control-user']);
-        userModels.getByEmail(email)
+        const {email, password} = req.body
+        const data = {
+            email,
+            password
+        }
+        console.log(data.email)
+        userModels.login(data.email)
             .then((result) => {
-                const dataUser = result[0]
-
-                const usePassword = MiscHelper.setPassword(password, dataUser.salt).passwordHash
-                if (usePassword === dataUser.password) {
-
-                    dataUser.token = jwt.sign({
-                        userid: dataUser.id_user
-                    }, process.env.SECRET_KEY, { expiresIn: '1h' });
-                    delete dataUser.salt
-                    delete dataUser.password
-                    console.log('Token stored !' + dataUser.token)
-                    return MiscHelper.response(res, dataUser, 200)
+                const checkPass = compareSync(data.password, result[0].password)
+                console.log(checkPass)
+                if (checkPass) {
+                    MiscHelper.response(res, result, 200, 'Login Successfully!');
                 } else {
-                    return MiscHelper.response(res, null, 403, 'Wrong password !')
+                    MiscHelper.response(res, null, 400, 'Invalid Password!');
                 }
             })
-            .catch((error) => {
-                console.log(error)
-            })
-    },
-    updateUser: async (req, res) => {
-        let path = req.file.path
-        const id_user = req.params.id_user
-        const { card_number, fullname, phone, job, address } = req.body
-
-        let geturl = async (req) => {
-            cloudinary.config({
-                cloud_name: process.env.CLOUD_NAME_PHOTO,
-                api_key: process.env.API_KEY_PHOTO,
-                api_secret: process.env.API_SECRET_PHOTO
-            })
-
-            let dataCloudinary
-            await cloudinary.uploader.upload(path, (result) => {
-                const fs = require('fs')
-                fs.unlinkSync(path)
-                dataCloudinary = result.url
-            })
-            return dataCloudinary
-        }
-
-        const data = {
-            card_number,
-            fullname,
-            photo: await geturl(),
-            phone,
-            job,
-            address,
-            updated_at: new Date()
-        }
-        userModels.updateUser(id_user, data)
-            .then((resultUser) => {
-                const result = resultUser
-                MiscHelper.response(res, result, 200, [id_user, data])
-            })
-            .catch((error) => {
-                console.log(error);
+            .catch(err => {
+                MiscHelper.response(res, null, 400, 'Invalid Email');
             })
     },
     insertUser: (req, res) => {
-        const { card_number, name, phone, job, address } = req.body
+        const { card_number, email, fullname, password, phone, job, address, photo, status } = req.body
         const data = {
             card_number,
-            name,
+            email,
+            fullname,
+            password,
             phone,
             job,
             address,
+            photo,
+            status,
             created_at: new Date(),
             updated_at: new Date()
         }
@@ -140,7 +91,6 @@ module.exports = {
             .catch((error) => {
                 console.log(error)
             })
-
     },
     deleteUser: (req, res) => {
         const id_user = req.params.id_user

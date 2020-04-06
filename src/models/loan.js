@@ -5,7 +5,7 @@ module.exports = {
         console.log(search)
         return new Promise((resolve, reject) => {
             if (search) {
-                connection.query("SELECT `loan_book`.*, `user`.`fullname`, `user`.`phone`, `book_manager`.`name` AS `title`, `book_manager`.`image`,`book_manager`.`writer` FROM loan_book INNER JOIN user ON loan_book.card_number = user.card_number INNER JOIN book_manager ON loan_book.id_book = book_manager.id_book WHERE loan_book.card_number LIKE ? OR user.fullname LIKE ? ORDER BY id_loanbook DESC", [`%${search}%`, `%${search}%`, `%${search}%`], (err, result) => {
+                connection.query("SELECT loan_book.*, id_loan, id_user, id_book, borrow_date, limit_borrow FROM loan_book WHERE loan_book ORDER BY id_loanbook DESC", [`%${search}%`, `%${search}%`, `%${search}%`], (err, result) => {
                     if (!err) {
                         resolve(result)
                     } else {

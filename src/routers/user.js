@@ -16,7 +16,7 @@ const multer = require('multer');
 // const upload = multer({ storage: storage })
 Route
     .all('/*', Auth.authInfo)
-    .get('/', Auth.accesstoken, userController.getUser)
+    .get('/', userController.getUser)
     .get('/:id_user', userController.userDetail)
     // .patch('/:id_user', upload.single('photo'), userController.updateUser)
     .post('/', userController.insertUser)
